@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pg-deployment
+  namespace: gb4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql-app
+  template:
+    metadata:
+      labels:
+        app: postgresql-app
+        role: recreate-update
+    spec:
+      containers:
+      - image: postgres:10.13
+        name: postgres
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: data
+        envFrom:
+          - configMapRef:
+              name: pg-configmap
+          - secretRef:
+              name: pg-secret
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pg-persistentvolumeclaim
+  strategy:
+    type: Recreate

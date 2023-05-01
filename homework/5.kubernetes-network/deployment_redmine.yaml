@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rm-deployment
+  namespace: gb4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redmine-app
+  template:
+    metadata:
+      labels:
+        app: redmine-app
+        role: recreate-update
+    spec:
+      containers:
+      - image: redmine:4.1.1
+        name: redmine
+        ports:
+        - containerPort: 3000
+        envFrom:
+          - configMapRef:
+              name: rm-configmap
+          - secretRef:
+              name: rm-secret
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+  strategy:
+    type: Recreate
